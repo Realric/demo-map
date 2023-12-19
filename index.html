@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/MarkerCluster.css">
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Palliative care Map</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet-heat.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/Heatmap_1.js"></script>
+        <script src="data/Categorized_2.js"></script>
+        <script src="data/Graduated_3.js"></script>
+        <script src="data/Countries_4.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffffff',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffffff',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[-32.188855291379326,-59.24281766896555],[53.94861681896554,96.88135053103449]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 0.4,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        function pop_Heatmap_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name of facility</th>\
+                        <td>' + (feature.properties['Name of facility'] !== null ? autolinker.link(feature.properties['Name of facility'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Your whatsapp number</span></th>\
+                        <td>' + (feature.properties['Your whatsapp number</span>'] !== null ? autolinker.link(feature.properties['Your whatsapp number</span>'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Year started</th>\
+                        <td>' + (feature.properties['Year started'] !== null ? autolinker.link(feature.properties['Year started'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Type of facility</th>\
+                        <td>' + (feature.properties['Type of facility'] !== null ? autolinker.link(feature.properties['Type of facility'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Patients served</th>\
+                        <td>' + (feature.properties['Patients served'] !== null ? autolinker.link(feature.properties['Patients served'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        map.createPane('pane_Heatmap_1');
+        map.getPane('pane_Heatmap_1').style.zIndex = 401;
+        map.getPane('pane_Heatmap_1').style['mix-blend-mode'] = 'normal';
+        var Heatmap_1_hm = geoJson2heat(json_Heatmap_1,
+                                      'Patients served');
+        var layer_Heatmap_1 = new L.heatLayer(Heatmap_1_hm, {
+            attribution: '',
+            interactive: true,
+            radius: 40,
+            max: 16000,
+            minOpacity: 1,
+            gradient: {0: '#fff5f0', 0.13: '#fee0d2', 0.26: '#fcbba1', 0.39: '#fc9272', 0.52: '#fb6a4a', 0.65: '#ef3b2c', 0.78: '#cb181d', 0.9: '#a50f15', 1: '#67000d'}});
+        bounds_group.addLayer(layer_Heatmap_1);
+        map.addLayer(layer_Heatmap_1);
+        function pop_Categorized_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name of facility</th>\
+                        <td>' + (feature.properties['Name of facility'] !== null ? autolinker.link(feature.properties['Name of facility'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Your whatsapp number</span></th>\
+                        <td>' + (feature.properties['Your whatsapp number</span>'] !== null ? autolinker.link(feature.properties['Your whatsapp number</span>'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Year started</th>\
+                        <td>' + (feature.properties['Year started'] !== null ? autolinker.link(feature.properties['Year started'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Type of facility</th>\
+                        <td>' + (feature.properties['Type of facility'] !== null ? autolinker.link(feature.properties['Type of facility'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Patients served</th>\
+                        <td>' + (feature.properties['Patients served'] !== null ? autolinker.link(feature.properties['Patients served'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Categorized_2_0(feature) {
+            switch(String(feature.properties['q2wHide_Category'])) {
+                case 'Level II Generalist palliative care services':
+                    return {
+                pane: 'pane_Categorized_2',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,126,137,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Not categorised':
+                    return {
+                pane: 'pane_Categorized_2',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(97,112,229,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_Categorized_2',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(134,205,125,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_Categorized_2');
+        map.getPane('pane_Categorized_2').style.zIndex = 402;
+        map.getPane('pane_Categorized_2').style['mix-blend-mode'] = 'normal';
+        var layer_Categorized_2 = new L.geoJson(json_Categorized_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Categorized_2',
+            layerName: 'layer_Categorized_2',
+            pane: 'pane_Categorized_2',
+            onEachFeature: pop_Categorized_2,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Categorized_2_0(feature));
+            },
+        });
+        var cluster_Categorized_2 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_Categorized_2.addLayer(layer_Categorized_2);
+
+        bounds_group.addLayer(layer_Categorized_2);
+        cluster_Categorized_2.addTo(map);
+        function pop_Graduated_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name of facility</th>\
+                        <td>' + (feature.properties['Name of facility'] !== null ? autolinker.link(feature.properties['Name of facility'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Your whatsapp number</span></th>\
+                        <td>' + (feature.properties['Your whatsapp number</span>'] !== null ? autolinker.link(feature.properties['Your whatsapp number</span>'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Year started</th>\
+                        <td>' + (feature.properties['Year started'] !== null ? autolinker.link(feature.properties['Year started'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Type of facility</th>\
+                        <td>' + (feature.properties['Type of facility'] !== null ? autolinker.link(feature.properties['Type of facility'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Patients served</th>\
+                        <td>' + (feature.properties['Patients served'] !== null ? autolinker.link(feature.properties['Patients served'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Graduated_3_0(feature) {
+            if (feature.properties['Patients served'] >= 0.000000 && feature.properties['Patients served'] <= 200.000000 ) {
+                return {
+                pane: 'pane_Graduated_3',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(79,4,255,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Patients served'] >= 200.000000 && feature.properties['Patients served'] <= 1000.000000 ) {
+                return {
+                pane: 'pane_Graduated_3',
+                radius: 8.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(8,253,69,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Patients served'] >= 1000.000000 && feature.properties['Patients served'] <= 3000.000000 ) {
+                return {
+                pane: 'pane_Graduated_3',
+                radius: 12.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,12,88,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Patients served'] >= 3000.000000 && feature.properties['Patients served'] <= 6000.000000 ) {
+                return {
+                pane: 'pane_Graduated_3',
+                radius: 16.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(45,234,255,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Patients served'] >= 6000.000000 && feature.properties['Patients served'] <= 16000.000000 ) {
+                return {
+                pane: 'pane_Graduated_3',
+                radius: 20.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(250,181,21,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_Graduated_3');
+        map.getPane('pane_Graduated_3').style.zIndex = 403;
+        map.getPane('pane_Graduated_3').style['mix-blend-mode'] = 'normal';
+        var layer_Graduated_3 = new L.geoJson(json_Graduated_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Graduated_3',
+            layerName: 'layer_Graduated_3',
+            pane: 'pane_Graduated_3',
+            onEachFeature: pop_Graduated_3,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Graduated_3_0(feature));
+            },
+        });
+        var cluster_Graduated_3 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_Graduated_3.addLayer(layer_Graduated_3);
+
+        bounds_group.addLayer(layer_Graduated_3);
+        cluster_Graduated_3.addTo(map);
+        function pop_Countries_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAME'] !== null ? autolinker.link(feature.properties['NAME'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Countries_4_0() {
+            return {
+                pane: 'pane_Countries_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Countries_4');
+        map.getPane('pane_Countries_4').style.zIndex = 404;
+        map.getPane('pane_Countries_4').style['mix-blend-mode'] = 'normal';
+        var layer_Countries_4 = new L.geoJson(json_Countries_4, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Countries_4',
+            layerName: 'layer_Countries_4',
+            pane: 'pane_Countries_4',
+            onEachFeature: pop_Countries_4,
+            style: style_Countries_4_0,
+        });
+        bounds_group.addLayer(layer_Countries_4);
+        map.addLayer(layer_Countries_4);
+            var title = new L.Control();
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>Palliative care Map</h2>';
+            };
+            title.addTo(map);
+            var abstract = new L.Control({'position':'bottomleft'});
+            abstract.onAdd = function (map) {
+                this._div = L.DomUtil.create('div',
+                'leaflet-control abstract');
+                this._div.id = 'abstract'
+
+                    abstract.show();
+                    return this._div;
+                };
+                abstract.show = function () {
+                    this._div.classList.remove("abstract");
+                    this._div.classList.add("abstractUncollapsed");
+                    this._div.innerHTML = 'A map visualizing the distribution of palliative care facilities in the Eastern Meditarranean Countries';
+            };
+            abstract.addTo(map);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/Countries_4.png" /> Countries': layer_Countries_4,'Graduated<br /><table><tr><td style="text-align: center;"><img src="legend/Graduated_3_02000.png" /></td><td>0 - 200</td></tr><tr><td style="text-align: center;"><img src="legend/Graduated_3_20010001.png" /></td><td>200 - 1000</td></tr><tr><td style="text-align: center;"><img src="legend/Graduated_3_100030002.png" /></td><td>1000 - 3000</td></tr><tr><td style="text-align: center;"><img src="legend/Graduated_3_300060003.png" /></td><td>3000 - 6000</td></tr><tr><td style="text-align: center;"><img src="legend/Graduated_3_6000160004.png" /></td><td>6000 - 16000</td></tr></table>': cluster_Graduated_3,'Categorized<br /><table><tr><td style="text-align: center;"><img src="legend/Categorized_2_LevelII0.png" /></td><td>Level II</td></tr><tr><td style="text-align: center;"><img src="legend/Categorized_2_Notcategorised1.png" /></td><td>Not categorised</td></tr><tr><td style="text-align: center;"><img src="legend/Categorized_2_LevelI2.png" /></td><td>Level I</td></tr></table>': cluster_Categorized_2,"OSM Standard": layer_OSMStandard_0,}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer_Countries_4.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['NAME'] !== null?String('<div style="color: #221fb4; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['NAME']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Countries_4'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        map.addControl(new L.Control.Search({
+            layer: layer_Heatmap_1,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'Patients served'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Patients served": "int","Year started": "int","NAME": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+        var i = 0;
+        layer_Countries_4.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['NAME'] !== null?String('<div style="color: #221fb4; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['NAME']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Countries_4'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Patientsserved = document.createElement("div");
+            div_Patientsserved.id = "div_Patientsserved";
+            div_Patientsserved.className = "slider";
+            document.getElementById("menu").appendChild(div_Patientsserved);
+            var lab_Patientsserved = document.createElement('div');
+            lab_Patientsserved.innerHTML  = 'Patients served: <span id="val_Patientsserved"></span>';
+            lab_Patientsserved.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Patientsserved);
+            var reset_Patientsserved = document.createElement('div');
+            reset_Patientsserved.innerHTML = 'clear filter';
+            reset_Patientsserved.className = 'filterlabel';
+            lab_Patientsserved.className = 'filterlabel';
+            reset_Patientsserved.onclick = function() {
+                sel_Patientsserved.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Patientsserved);
+            var sel_Patientsserved = document.getElementById('div_Patientsserved');
+            noUiSlider.create(sel_Patientsserved, {
+                connect: true,
+                start: [0, 16000],
+                step: 1,
+                format: wNumb({
+                    decimals: 0,
+                    }),
+                range: {
+                min: 0,
+                max: 16000
+                }
+            });
+            sel_Patientsserved.noUiSlider.on('update', function (values) {
+            filterVals =[];
+            for (value in values){
+            filterVals.push(parseInt(value))
+            }
+            val_Patientsserved = document.getElementById('val_Patientsserved');
+            val_Patientsserved.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Yearstarted = document.createElement("div");
+            div_Yearstarted.id = "div_Yearstarted";
+            div_Yearstarted.className = "slider";
+            document.getElementById("menu").appendChild(div_Yearstarted);
+            var lab_Yearstarted = document.createElement('div');
+            lab_Yearstarted.innerHTML  = 'Year started: <span id="val_Yearstarted"></span>';
+            lab_Yearstarted.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_Yearstarted);
+            var reset_Yearstarted = document.createElement('div');
+            reset_Yearstarted.innerHTML = 'clear filter';
+            reset_Yearstarted.className = 'filterlabel';
+            lab_Yearstarted.className = 'filterlabel';
+            reset_Yearstarted.onclick = function() {
+                sel_Yearstarted.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_Yearstarted);
+            var sel_Yearstarted = document.getElementById('div_Yearstarted');
+            noUiSlider.create(sel_Yearstarted, {
+                connect: true,
+                start: [0, 20172022],
+                step: 1,
+                format: wNumb({
+                    decimals: 0,
+                    }),
+                range: {
+                min: 0,
+                max: 20172022
+                }
+            });
+            sel_Yearstarted.noUiSlider.on('update', function (values) {
+            filterVals =[];
+            for (value in values){
+            filterVals.push(parseInt(value))
+            }
+            val_Yearstarted = document.getElementById('val_Yearstarted');
+            val_Yearstarted.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_NAME = document.createElement('div');
+            div_NAME.id = "div_NAME";
+            div_NAME.className= "filterselect";
+            document.getElementById("menu").appendChild(div_NAME);
+            sel_NAME = document.createElement('select');
+            sel_NAME.multiple = true;
+            sel_NAME.size = 10;
+            sel_NAME.id = "sel_NAME";
+            var NAME_options_str = "<option value='' unselected></option>";
+            sel_NAME.onchange = function(){filterFunc()};
+            NAME_options_str  += '<option value="0">0</option>';
+            NAME_options_str  += '<option value="Afghanistan">Afghanistan</option>';
+            NAME_options_str  += '<option value="Bahrain">Bahrain</option>';
+            NAME_options_str  += '<option value="Djibouti">Djibouti</option>';
+            NAME_options_str  += '<option value="Egypt">Egypt</option>';
+            NAME_options_str  += '<option value="Iran">Iran</option>';
+            NAME_options_str  += '<option value="Iraq">Iraq</option>';
+            NAME_options_str  += '<option value="Jordan">Jordan</option>';
+            NAME_options_str  += '<option value="Kuwait">Kuwait</option>';
+            NAME_options_str  += '<option value="Lebanon">Lebanon</option>';
+            NAME_options_str  += '<option value="Libya">Libya</option>';
+            NAME_options_str  += '<option value="Morocco">Morocco</option>';
+            NAME_options_str  += '<option value="Oman">Oman</option>';
+            NAME_options_str  += '<option value="Pakistan">Pakistan</option>';
+            NAME_options_str  += '<option value="Palestine">Palestine</option>';
+            NAME_options_str  += '<option value="Qatar">Qatar</option>';
+            NAME_options_str  += '<option value="Romania">Romania</option>';
+            NAME_options_str  += '<option value="S. Sudan">S. Sudan</option>';
+            NAME_options_str  += '<option value="Saudi Arabia">Saudi Arabia</option>';
+            NAME_options_str  += '<option value="Somalia">Somalia</option>';
+            NAME_options_str  += '<option value="Sudan">Sudan</option>';
+            NAME_options_str  += '<option value="Syria">Syria</option>';
+            NAME_options_str  += '<option value="Tunisia">Tunisia</option>';
+            NAME_options_str  += '<option value="United Arab Emirates">United Arab Emirates</option>';
+            NAME_options_str  += '<option value="Yemen">Yemen</option>';
+            sel_NAME.innerHTML = NAME_options_str;
+            div_NAME.appendChild(sel_NAME);
+            var lab_NAME = document.createElement('div');
+            lab_NAME.innerHTML = 'NAME';
+            lab_NAME.className = 'filterlabel';
+            div_NAME.appendChild(lab_NAME);
+            var reset_NAME = document.createElement('div');
+            reset_NAME.innerHTML = 'clear filter';
+            reset_NAME.className = 'filterlabel';
+            reset_NAME.onclick = function() {
+                var options = document.getElementById("sel_NAME").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_NAME.appendChild(reset_NAME);
+        function geoJson2heat(geojson, weight) {
+          return geojson.features.map(function(feature) {
+            return [
+              feature.geometry.coordinates[1],
+              feature.geometry.coordinates[0],
+              feature.properties[weight]
+            ];
+          });
+        }
+        resetLabels([layer_Heatmap_1,layer_Countries_4]);
+        map.on("zoomend", function(){
+            resetLabels([layer_Heatmap_1,layer_Countries_4]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_Heatmap_1,layer_Countries_4]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_Heatmap_1,layer_Countries_4]);
+        });
+        </script>
+    </body>
+</html>
